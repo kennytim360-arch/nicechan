@@ -1,0 +1,33 @@
+{
+  "sources": {
+    "hn": {
+      "enabled": true,
+      "communities": ["top", "new"]
+    },
+    "4chan": {
+      "enabled": true,
+      "boards": ["3", "a", "biz", "ck", "diy", "fit", "his", "int", "g", "k", "lit", "mu", "out", "pol", "sci", "sp", "tv", "v", "vg", "trv"],
+      "latest": ["g"]
+    },
+    "lemmy": {
+      "enabled": true,
+      "instances": [
+        { "base": "https://programming.dev", "communities": ["technology"] },
+        { "base": "https://lemmy.world", "communities": ["technology", "news"] }
+      ]
+    },
+    "manifold": {
+      "enabled": true,
+      "communities": ["markets"]
+    },
+    "lesswrong": {
+      "enabled": true,
+      "communities": ["new", "top"]
+    },
+    "eaforum": {
+      "enabled": true,
+      "communities": ["new", "top"]
+    }
+  },
+  "latest": { "perCommunity": 12, "maxTotal": 120, "cacheSeconds": 120 }
+}

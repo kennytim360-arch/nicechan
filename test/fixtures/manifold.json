@@ -1,0 +1,186 @@
+{
+ "scenario": {
+  "community": "markets",
+  "listLimit": 5,
+  "threadId": "RN6N9RZlnP",
+  "listingCount": 5,
+  "threadCount": 1
+ },
+ "records": {
+  "GET https://api.manifold.markets/v0/markets?limit=5 ": [
+   {
+    "id": "RN6N9RZlnP",
+    "creatorId": "srFlJRuVlGa7SEJDM4cY9B5k4Lj2",
+    "creatorUsername": "Bayesian",
+    "creatorName": "Bayesian",
+    "createdTime": 1792800489535,
+    "creatorAvatarUrl": "https://firebasestorage.googleapis.com/v0/b/mantic-markets.appspot.com/o/user-images%2FBayesian%2FZkuJDsEcaR.png?alt=media&token=007b04d0-7859-4fb3-ab4b-99938a8b4ab3",
+    "closeTime": 1798761540000,
+    "question": "will i get a clawd plushie and clawd stickers in 2026?",
+    "slug": "will-i-get-a-clawd-plushie-and-claw",
+    "url": "https://manifold.markets/Bayesian/will-i-get-a-clawd-plushie-and-claw",
+    "pool": {
+     "NO": 109,
+     "YES": 81.78459451494014
+    },
+    "probability": 0.36353846532322537,
+    "p": 0.3,
+    "totalLiquidity": 100,
+    "outcomeType": "BINARY",
+    "mechanism": "cpmm-1",
+    "volume": 9,
+    "volume24Hours": 9,
+    "isResolved": false,
+    "uniqueBettorCount": 1,
+    "lastUpdatedTime": 1792801963022,
+    "lastBetTime": 1792801963022
+   },
+   {
+    "id": "AICp9uILIA",
+    "creatorId": "j3qXHWAZS4b37tlcY3u22l1D1qF3",
+    "creatorUsername": "Jack1",
+    "creatorName": "Jack",
+    "createdTime": 1792800128138,
+    "creatorAvatarUrl": "https://firebasestorage.googleapis.com/v0/b/mantic-markets.appspot.com/o/user-images%2FJack1%2F69Ouyz6NyO.jpeg?alt=media&token=61dde0cb-6297-4c16-8acd-fd11ef57a7f8",
+    "closeTime": 1863561540000,
+    "question": "Do you think America’s standing the world has improved or worsened since Donald Trump became president again in 2025?",
+    "slug": "do-you-think-americas-standing-the",
+    "url": "https://manifold.markets/Jack1/do-you-think-americas-standing-the",
+    "outcomeType": "POLL",
+    "mechanism": "none",
+    "volume": 0,
+    "volume24Hours": 0,
+    "isResolved": false,
+    "uniqueBettorCount": 3,
+    "lastUpdatedTime": 1792800128194
+   },
+   {
+    "id": "IEAACZN9Ip",
+    "creatorId": "YiwGopNv35PofGHeN2Ir2i349Mw1",
+    "creatorUsername": "JayRowland",
+    "creatorName": "Jay Rowland",
+    "createdTime": 1792793351360,
+    "creatorAvatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocJFavYXi9FmmI599wR4on1x7W83Xx-ulpdw_D7VNfEjvG8Oyz-I5w=s96-c",
+    "closeTime": 1798758360000,
+    "question": "Will Evan win the foot race?",
+    "slug": "evan-vs-lindsay-foot-race",
+    "url": "https://manifold.markets/JayRowland/evan-vs-lindsay-foot-race",
+    "pool": {
+     "NO": 104.99999999504954,
+     "YES": 95.2380952425855
+    },
+    "probability": 0.5243757431393837,
+    "p": 0.5000000000000001,
+    "totalLiquidity": 100,
+    "outcomeType": "BINARY",
+    "mechanism": "cpmm-1",
+    "volume": 8.677594075983134,
+    "volume24Hours": 8.677594075983134,
+    "isResolved": false,
+    "uniqueBettorCount": 3,
+    "lastUpdatedTime": 1792795350644,
+    "lastBetTime": 1792795297452
+   },
+   {
+    "id": "su8USdlAup",
+    "creatorId": "aCPz3Eoz6gXIHotuWr4syqu01c43",
+    "creatorUsername": "MariapIQs",
+    "creatorName": "Maria",
+    "createdTime": 1792788801913,
+    "creatorAvatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocKiHJHFAtSZrg30PKeCw76OM_IvnelXgvUDp7BiQFhyx2KgSA=s96-c",
+    "closeTime": 1793750340000,
+    "question": "Will republicans win the midterms?",
+    "slug": "will-republicans-win-the-midterms",
+    "url": "https://manifold.markets/MariapIQs/will-republicans-win-the-midterms",
+    "pool": {
+     "NO": 21.240384046359594,
+     "YES": 470.8012801545322
+    },
+    "probability": 0.043167856691273064,
+    "p": 0.5000000000000001,
+    "totalLiquidity": 100,
+    "outcomeType": "BINARY",
+    "mechanism": "cpmm-1",
+    "volume": 495.3311051324841,
+    "volume24Hours": 495.33110513248414,
+    "isResolved": false,
+    "uniqueBettorCount": 9,
+    "lastUpdatedTime": 1792795354881,
+    "lastBetTime": 1792795354881
+   },
+   {
+    "id": "ns6sZUz9RP",
+    "creatorId": "o527kTOFRRSAxyuW8OdWcNBmG5g2",
+    "creatorUsername": "MonicaLewinsky",
+    "creatorName": "Monica Lewinsky",
+    "createdTime": 1792788516709,
+    "creatorAvatarUrl": "https://firebasestorage.googleapis.com/v0/b/mantic-markets.appspot.com/o/user-images%2FTumblesA%2FPuZshtZzuz.PNG?alt=media&token=1e8caf93-530e-4c59-8062-550536255885",
+    "closeTime": 1796083140000,
+    "question": "How many House Seats will the Republicans win in the 2026 Midterms? [Add Answers]",
+    "slug": "how-many-house-seats-will-the-repub-qNtdcIZEPc",
+    "url": "https://manifold.markets/MonicaLewinsky/how-many-house-seats-will-the-repub-qNtdcIZEPc",
+    "totalLiquidity": 1000,
+    "outcomeType": "MULTIPLE_CHOICE",
+    "mechanism": "cpmm-multi-2",
+    "volume": 212.0000000000003,
+    "volume24Hours": 212.0000000000003,
+    "isResolved": false,
+    "uniqueBettorCount": 2,
+    "lastUpdatedTime": 1792796352715,
+    "lastBetTime": 1792796352715,
+    "lastCommentTime": 1792796248819
+   }
+  ],
+  "GET https://api.manifold.markets/v0/market/RN6N9RZlnP ": {
+   "id": "RN6N9RZlnP",
+   "creatorId": "srFlJRuVlGa7SEJDM4cY9B5k4Lj2",
+   "creatorUsername": "Bayesian",
+   "creatorName": "Bayesian",
+   "createdTime": 1792800489535,
+   "creatorAvatarUrl": "https://firebasestorage.googleapis.com/v0/b/mantic-markets.appspot.com/o/user-images%2FBayesian%2FZkuJDsEcaR.png?alt=media&token=007b04d0-7859-4fb3-ab4b-99938a8b4ab3",
+   "closeTime": 1798761540000,
+   "question": "will i get a clawd plushie and clawd stickers in 2026?",
+   "slug": "will-i-get-a-clawd-plushie-and-claw",
+   "url": "https://manifold.markets/Bayesian/will-i-get-a-clawd-plushie-and-claw",
+   "pool": {
+    "NO": 109,
+    "YES": 81.78459451494014
+   },
+   "probability": 0.36353846532322537,
+   "p": 0.3,
+   "totalLiquidity": 100,
+   "outcomeType": "BINARY",
+   "mechanism": "cpmm-1",
+   "volume": 9,
+   "volume24Hours": 9,
+   "isResolved": false,
+   "uniqueBettorCount": 1,
+   "lastUpdatedTime": 1792801963022,
+   "lastBetTime": 1792801963022,
+   "token": "MANA",
+   "description": {
+    "type": "doc",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "text": "I want one, if someone helps me get one i will send them 3000 manas. I will pay any price (not true)",
+        "type": "text"
+       }
+      ]
+     }
+    ]
+   },
+   "groupSlugs": [
+    "world-default",
+    "entertainment",
+    "technology-default",
+    "culture-default",
+    "business"
+   ],
+   "textDescription": "I want one, if someone helps me get one i will send them 3000 manas. I will pay any price (not true)"
+  },
+  "GET https://api.manifold.markets/v0/comments?contractId=RN6N9RZlnP&limit=100 ": []
+ }
+}
