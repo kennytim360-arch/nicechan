@@ -5,3 +5,6 @@ node_modules/
 
 # Digest database (built-in node:sqlite) and any local data
 data/
+
+# Handoff archive (not source)
+nicechan-handoff.zip
