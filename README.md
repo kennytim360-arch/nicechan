@@ -18,12 +18,16 @@ Set `PORT` to change the port. Copy `.env.example` to `.env` for keys you will n
 
 ## Using it
 
-- **Latest** shows the newest items from every enabled community, merged and sorted by time.
-- The sidebar lists sources and their communities. A source that fails shows as "unavailable" and does not break the rest.
-- Open a thread to read it in one column, with each post linked to its original.
-- **Safe mode** (on by default) masks rude words on the server and blurs thumbnails until clicked. Turning it off sends the original text.
-- **Filter** (top bar, or press `/`) narrows the current list. Press Esc to clear it.
-- The theme button cycles system, light and dark.
+Layout and copy follow the approved mockups in `design/` (see `AGENTS.md`).
+
+- **Home** (`#/`) lists the newest threads from every source in one table. Each row shows the source, the domain, points, the author and the age.
+- **Source filter:** the bracket list at the top (`[all / HN / 4chan / ...]`) shows one source.
+- **Sources** and **About** pages are linked from the black bar.
+- **Thread** pages show every comment in time order, with `>>` gutters and nested replies. Each post links to its original.
+- **Safe mode** (on by default) is applied by the server. Rude words show as a button; press it to turn Safe mode off and read the word. Thumbnails are blurred until clicked.
+- **Search** (top right) filters the current table.
+
+Not built yet: AI rundowns and digest pages (Milestones 3 and 4), native "Post a Take" comments and story rooms (Milestone 5), and view counts, which no source API provides, so the Views column shows a dash.
 
 ## Adding a source or community
 

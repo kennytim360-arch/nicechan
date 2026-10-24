@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nice Chan thread</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+body{margin:0;background:#BDEF3F}
+a{color:#000;text-decoration:underline;text-underline-offset:3px}
+a:hover{background:#000;color:#BDEF3F}
+.act{border:0;background:transparent;padding:0;font:inherit;color:#000;text-decoration:underline;text-underline-offset:3px;cursor:pointer;text-align:left}
+.act:hover{background:#000;color:#BDEF3F}
+a:focus-visible,button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid #000;outline-offset:2px}
+pre{margin:0;font:inherit;overflow:visible}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; background: #BDEF3F; color: #000000; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 16px; line-height: 24px">
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; padding: 4px 24px; font-size: 13px; line-height: 20px"><span>[<a href="Main.dc.html">all</a> / <a href="Main.dc.html">hn</a> / <a href="Main.dc.html">4chan</a> / <a href="Main.dc.html">lemmy</a> / <a href="Main.dc.html">manifold</a> / <a href="Main.dc.html">lw</a>]</span><span>[<a href="Main.dc.html">Settings</a>] [<a href="Main.dc.html">Search</a>] [<a href="Main.dc.html">Mobile</a>] [<a href="Main.dc.html">Home</a>]</span></div>
+<header style="padding: 12px 24px; background: #000000; color: #BDEF3F">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 24px">
+<a href="Main.dc.html" style="color: #BDEF3F; font-size: 20px; font-weight: 700; text-decoration: none">&gt;nicechan</a>
+<nav style="display: flex; flex-wrap: wrap; gap: 0 8px">
+<a href="Main.dc.html" style="color: #BDEF3F; text-decoration: none">hot</a><span>|</span><a href="Main.dc.html" style="color: #BDEF3F; text-decoration: none">new</a><span>|</span><a href="Main.dc.html" style="color: #BDEF3F; text-decoration: none">past</a><span>|</span><a href="Main.dc.html" style="color: #BDEF3F; text-decoration: none">sources</a><span>|</span><a href="Main.dc.html" style="color: #BDEF3F; text-decoration: none">about</a><span>|</span><a href="Main.dc.html" style="color: #BDEF3F; text-decoration: none">login</a>
+</nav>
+<button type="button" class="act" aria-pressed="{{safeOn}}" onClick="{{toggleSafe}}" style="margin-left: auto; color: #BDEF3F; text-decoration: none">safe mode: <b>{{safeWord}}</b></button>
+</div>
+</header>
+
+<main style="padding: 0 24px 96px">
+
+<div style="margin-top: 24px"><span style="font-size: 24px; line-height: 32px; font-weight: 700">Dagger 1.0 Beta</span> <span>(dagger.io)</span></div>
+<div style="font-size: 14px; line-height: 20px"><span style="color: #E4600A">&#9632;</span> Hacker News | 7 comments | 10 minutes ago | <a href="Story.dc.html" style="font-weight: 700">AI rundown with Lemmy and 4chan</a></div>
+
+<h2 style="margin: 72px 0 0; font-size: 20px; line-height: 24px; font-weight: 700">&gt;comments</h2>
+<div style="max-width: 80ch">Replies from Nice Chan visitors are marked [Nice Chan]. Press [reply] under any comment to answer it.</div>
+<div aria-hidden="true" style="overflow: hidden; white-space: nowrap">{{eq}}</div>
+
+<sc-for list="{{rows}}" as="c" hint-placeholder-count="4">
+<div>
+<div style="margin: 8px 0 0 {{c.indent}}; display: flex; gap: 6px; align-items: flex-start"><span aria-hidden="true" style="font-size: 13px; line-height: 20px">&gt;&gt;</span>
+<div style="width: fit-content; max-width: 76ch; border: 1px solid #000; background: #D6F77D; padding: 4px 8px">
+<div style="display: flex; flex-wrap: wrap; gap: 0 8px; font-size: 13px; line-height: 20px"><span aria-hidden="true">&#9744;</span><b>{{c.name}}</b><span><span style="color: {{c.dot}}">&#9632;</span> [{{c.tag}}]</span><span>{{c.age}}</span><span>{{c.mark}}</span><span aria-hidden="true">&#9654;</span><span style="text-decoration: underline">{{c.back}}</span><span style="margin-left: 12px"><button type="button" class="act" onClick="{{c.toggleReply}}">[reply]</button> <button type="button" class="act">[quote]</button></span></div>
+<sc-for list="{{c.lines}}" as="ln" hint-placeholder-count="1">
+<p style="margin: 6px 0 0; font-style: {{ln.style}}; text-decoration: {{ln.deco}}">{{ln.before}}<sc-if value="{{ln.hasWord}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{reveal}}" aria-label="Hidden word. Press to show." style="border: 0; background: #A8D62E; padding: 0 4px; font: inherit; color: #000; filter: {{blurNow}}; cursor: pointer">{{ln.word}}</button></sc-if>{{ln.after}}</p>
+</sc-for>
+<sc-if value="{{c.formOpen}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 24px">
+<label for="rp-{{c.id}}" style="display: block; font-weight: 700">Your reply to {{c.name}}</label>
+<textarea id="rp-{{c.id}}" rows="4" onInput="{{c.onDraft}}" style="box-sizing: border-box; display: block; width: 100%; resize: none; border: 2px solid #000; border-radius: 0; background: #DDF99A; padding: 12px; font: inherit; line-height: 24px; color: #000"></textarea>
+<div style="margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center">
+<button type="button" onClick="{{c.postReply}}" style="border: 0; border-radius: 0; background: #000; color: #BDEF3F; height: 48px; padding: 0 24px; font: inherit; font-weight: 700; cursor: pointer">Post reply</button>
+<button type="button" class="act" onClick="{{c.cancel}}">[cancel]</button>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+
+<sc-if value="{{c.techNote}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 48px; max-width: 80ch">
+<div style="font-weight: 700">&gt;tech note: how a pipeline like this runs</div>
+<div>Drawn by AI from what the comments describe. Not part of the original thread.</div>
+<pre style="margin-top: 24px">{{diagram}}</pre>
+<div style="margin-top: 24px"><b>Pipeline</b>: a list of automated steps, such as build, test and publish, that turn code into software people can use.</div>
+<div style="margin-top: 24px"><b>CI (continuous integration)</b>: a server that runs the pipeline automatically every time someone changes the code.</div>
+<div style="margin-top: 24px"><b>Container</b>: a sealed package that holds a program and everything it needs, so it runs the same way on any computer.</div>
+</div>
+</sc-if>
+
+</div>
+</sc-for>
+
+<h2 style="margin: 48px 0 0; font-size: 20px; line-height: 24px; font-weight: 700">&gt;add your take</h2>
+<div style="max-width: 80ch">Comments here are by Nice Chan visitors. Text only. Be nice.</div>
+
+<sc-if value="{{topOpen}}" hint-placeholder-val="{{ true }}">
+<div style="margin-top: 24px; display: flex; flex-direction: column; max-width: 60ch">
+<label for="nm" style="font-weight: 700">Name</label>
+<input id="nm" type="text" placeholder="Anonymous" onInput="{{onName}}" style="box-sizing: border-box; width: 100%; height: 48px; border: 2px solid #000; border-radius: 0; background: #DDF99A; padding: 0 12px; font: inherit; color: #000">
+<label for="take" style="margin-top: 24px; font-weight: 700">Comment</label>
+<textarea id="take" rows="5" onInput="{{onTop}}" style="box-sizing: border-box; width: 100%; resize: none; border: 2px solid #000; border-radius: 0; background: #DDF99A; padding: 12px; font: inherit; line-height: 24px; color: #000"></textarea>
+<button type="button" onClick="{{postTop}}" style="margin-top: 24px; align-self: flex-start; border: 0; border-radius: 0; background: #000; color: #BDEF3F; height: 48px; padding: 0 24px; font: inherit; font-weight: 700; cursor: pointer">Post comment</button>
+</div>
+</sc-if>
+<sc-if value="{{topDone}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 24px 0 0"><b>Posted.</b> Your comment is in the thread above. <button type="button" class="act" onClick="{{writeAnother}}">[write another]</button></p>
+</sc-if>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2200}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const posted = s.posted || [];
+    const replyTo = s.replyTo || null;
+    const safe = s.safe !== false;
+    const revealed = s.revealed === true;
+    const topDone = s.topDone === true;
+    const WORD = 'crap';
+
+    const base = [
+      { id: 'c1', name: 'ferrous_14', age: '10 minutes ago', mark: 'No.8838 (OP)', techNote: true, lines: [['Ran our CI through this for a month. Best part: it runs the same on my laptop and the server, so I finally stopped pushing \\"fix ci pls\\" commits at 2am.', 0]] },
+      { id: 'c3', name: 'kelpie', age: '8 minutes ago', mark: 'No.8839', lines: [['>>8838', 0], ['Does it cache between runs, or does every step rebuild its container from scratch?', 0]] },
+      { id: 'c6', name: 'ferrous_14', age: '6 minutes ago', mark: 'No.8840', lines: [['>>8839', 0], ['It caches layers, so unchanged steps are skipped. The old config format was crap by comparison.', 0]] },
+      { id: 'c8', name: 'tarpit', age: '5 minutes ago', mark: 'No.8841', lines: [['>>8840', 0], ['Local cache is fine. Sharing the cache across machines is the part you pay for, and that is the lock-in people mean.', 0]] },
+      { id: 'c9', name: 'ferrous_14', age: '4 minutes ago', mark: 'No.8842', lines: [['>>8841', 0], ['Fair. We just run it without the shared cache and it is still faster than our old setup.', 0]] },
+      { id: 'c11', name: 'kelpie', age: '3 minutes ago', mark: 'No.8843', lines: [['>>8842', 0], ['Make does not cache by content and does not behave the same on CI. That is the whole pitch.', 0]] },
+      { id: 'c13', name: 'tarpit', age: '2 minutes ago', mark: 'No.8844', lines: [['>>8843', 0], ['Nix is great until you have to onboard someone new.', 0]] }
+    ];
+    const natives = [{ id: 'n0', parent: 'c1', name: 'Anonymous', age: '1 minute ago', lines: [['Same here. Our laptop runs and our CI runs finally match.', 0]] }].concat(posted);
+
+    const split = (t) => {
+      const i = t.indexOf(WORD);
+      if (i < 0) return { before: t, hasWord: false, word: '', after: '' };
+      return { before: t.slice(0, i), hasWord: true, word: WORD, after: t.slice(i + WORD.length) };
+    };
+    const draftSetter = () => (e) => { this._draft = e.target.value; };
+    const mk = (n, depth, isNative) => {
+      const open = replyTo === n.id;
+      return {
+        id: n.id, name: n.name, tag: isNative ? 'Nice Chan' : 'Hacker News', dot: isNative ? '#0E5B20' : '#E4600A', age: n.age, mark: n.mark || '',
+        techNote: !!n.techNote,
+        lines: n.lines.map(l => Object.assign({ style: l[1] ? 'italic' : 'normal', deco: l[0].indexOf('>>') === 0 ? 'underline' : 'none' }, split(l[0]))),
+        indent: depth ? (Math.min(depth, 3) * 24) + 'px' : '0px',
+        pad: depth ? '16px' : '0px',
+        border: depth ? '2px solid #000' : '0 none',
+        formOpen: open,
+        toggleReply: () => { this._draft = ''; this.setState({ replyTo: open ? null : n.id }); },
+        onDraft: draftSetter(),
+        postReply: () => {
+          const t = (this._draft || '').trim();
+          if (!t) return;
+          this._draft = '';
+          this.setState({ posted: posted.concat([{ id: 'p' + (posted.length + 1), parent: n.id, name: 'Anonymous', age: 'just now', lines: [[t, 0]] }]), replyTo: null });
+        },
+        cancel: () => { this._draft = ''; this.setState({ replyTo: null }); }
+      };
+    };
+    const rows = [];
+    const walk = (n, depth, isNative) => {
+      rows.push(mk(n, depth, isNative));
+      natives.filter(x => x.parent === n.id).forEach(ch => walk(ch, depth + 1, true));
+    };
+    base.forEach(c => walk(c, 0, false));
+    natives.filter(x => !x.parent).forEach(n => walk(n, 0, true));
+
+    // Vertical pipeline diagram
+    const bw = 22, edge = '+' + '-'.repeat(bw) + '+', bl = t => '| ' + t.padEnd(bw - 2) + ' |';
+    const mid = ' '.repeat(Math.floor((bw + 2) / 2));
+    const steps = [['your code'], ['build', 'runs in a container'], ['test', 'runs in a container'], ['publish', 'runs in a container']];
+    const d1 = [];
+    steps.forEach((st, i) => {
+      if (i) { d1.push(mid + '|'); d1.push(mid + 'v'); }
+      d1.push(edge); st.forEach(t => d1.push(bl(t))); d1.push(edge);
+    });
+
+    return {
+      eq: '='.repeat(160), stars: '* '.repeat(80),
+      diagram: d1.join('\n'),
+      rows,
+      safeOn: safe ? 'true' : 'false', safeWord: safe ? 'on' : 'off',
+      blurNow: (safe && !revealed) ? 'blur(5px)' : 'none',
+      toggleSafe: () => this.setState({ safe: !safe, revealed: false }),
+      reveal: () => this.setState({ revealed: true }),
+      topOpen: !topDone, topDone,
+      onName: (e) => { this._name = e.target.value; },
+      onTop: (e) => { this._top = e.target.value; },
+      postTop: () => {
+        const t = (this._top || '').trim();
+        if (!t) return;
+        const nm = (this._name || '').trim() || 'Anonymous';
+        this._top = ''; this._name = '';
+        this.setState({ posted: posted.concat([{ id: 'p' + (posted.length + 1), parent: null, name: nm, age: 'just now', lines: [[t, 0]] }]), topDone: true });
+      },
+      writeAnother: () => this.setState({ topDone: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

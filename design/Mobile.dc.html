@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nice Chan home on a phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+body{margin:0;background:#BDEF3F}
+a{color:#000;text-decoration:underline;text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:3px solid #000;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #BDEF3F; color: #000000; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 16px; line-height: 24px">
+
+<header style="padding: 24px 24px 0">
+<nav style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 24px">
+<a href="Mobile.dc.html" style="font-weight: 700">Home</a>
+<a href="Mobile.dc.html">Sources</a>
+<a href="Mobile.dc.html">About</a>
+</nav>
+<h1 style="margin: 24px 0 0; font-size: 32px; line-height: 48px; font-weight: 700; letter-spacing: -0.02em">&gt;nicechan&#9608;</h1>
+<button type="button" aria-pressed="true" style="min-height: 44px; border: 0; background: transparent; padding: 0; font: inherit; color: #000; cursor: pointer">Safe mode: <b>on</b></button>
+<div aria-hidden="true" style="overflow: hidden; white-space: nowrap">{{eq}}</div>
+</header>
+
+<main style="padding: 0 24px">
+
+<div style="margin-top: 24px">&gt;be you</div>
+<div>&gt;want to know what the internet is actually saying</div>
+<div>&gt;read every forum at once, minus the slurs</div>
+<h2 style="margin: 48px 0 0; font-size: 16px; line-height: 24px; font-weight: 700">&gt;stories</h2>
+<div aria-hidden="true" style="overflow: hidden; white-space: nowrap">{{eq}}</div>
+
+<div style="padding-top: 24px">
+<a href="Story.dc.html" style="font-size: 20px; line-height: 24px; font-weight: 700">Dagger 1.0 Beta</a>
+<div>Talked about on:</div>
+<div><span style="color: #E4600A">&#9632;</span> [Hacker News]</div>
+<div><span style="color: #0A7C8F">&#9632;</span> [Lemmy]</div>
+<div><span style="color: #AF0A0F">&#9632;</span> [4chan /g/]</div>
+<div style="margin-top: 8px"><a href="Story.dc.html" style="font-weight: 700">[Get the AI rundown]</a></div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { eq: '='.repeat(60) };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,51 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nice Chan</title>
-<meta name="description" content="Read public forum discussions side by side, with Safe mode on by default.">
+<meta name="description" content="Read public forum discussions side by side. Safe mode is on by default.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
 <link rel="stylesheet" href="style.css">
-<script>
-  // Apply saved theme before first paint to avoid a flash.
-  try { var t = localStorage.getItem("theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
-</script>
 </head>
 <body>
-<div class="app">
-  <header class="topbar">
-    <button class="icon-btn menu-btn" id="menu" aria-label="Show boards">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    </button>
-    <a class="brand" href="#/g">nice<span>chan</span></a>
+<div class="page">
+  <div class="toprow">
+    <span class="boards" id="boards">[<a href="#/">all</a>]</span>
+    <span class="utility">[<button class="act" id="search-toggle" type="button" aria-expanded="false">Search</button>] [<a href="#/">Home</a>]</span>
+  </div>
 
-    <div class="search">
-      <input id="search" type="search" placeholder="Filter threads" aria-label="Filter threads" autocomplete="off">
-      <kbd class="kbd">/</kbd>
-    </div>
-
-    <div class="top-actions">
-      <label class="switch" title="Blur rude words and images until you click them">
-        <input type="checkbox" id="safe" checked>
-        <span class="track"></span>
-        <span class="lbl">Safe mode</span>
-      </label>
-      <button class="icon-btn" id="theme" aria-label="Change theme">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
-      </button>
+  <header class="bar">
+    <div class="bar-row">
+      <a class="brand" href="#/">&gt;nicechan</a>
+      <nav class="bar-nav" aria-label="Main">
+        <a href="#/">latest</a><span>|</span><a href="#/sources">sources</a><span>|</span><a href="#/about">about</a>
+      </nav>
+      <button class="act bar-safe" id="safe" type="button" aria-pressed="true">safe mode: <b>on</b></button>
     </div>
   </header>
 
-  <div class="shell">
-    <aside class="sidebar" id="sidebar">
-      <div class="side-title">Boards</div>
-      <nav id="boards" class="board-list"><div class="muted pad">Loading boards…</div></nav>
-    </aside>
-    <main class="main" id="main">
-      <div id="view" aria-live="polite"></div>
-    </main>
+  <div class="search" id="search-box" hidden>
+    <label for="filter">Filter these threads</label>
+    <input id="filter" type="search" autocomplete="off">
   </div>
-  <div class="scrim" id="scrim"></div>
+
+  <main id="view" class="main" aria-live="polite">
+    <p class="loading">Loading…</p>
+  </main>
 </div>
 
 <script src="app.js"></script>

@@ -90,3 +90,39 @@ Add tests for the filter, the moderation module (with a mocked classifier), the 
 - `NOTES.md` lists each source's terms-of-use link, the moderation duties that come with hosting user comments, and a reminder to check the legal rules (for example the EU Digital Services Act and the UK Online Safety Act) for wherever the site is hosted, before making it public.
 
 Ask before adding any new dependency that is heavier than a small utility library.
+
+---
+
+# DESIGN (supersedes any older UI notes above)
+
+The approved design mockups are in `design/` (open the `.dc.html` files in a browser; they are sample content only, all names, numbers and comments are invented). Match them. Do not restyle.
+
+## Look
+- Background lime `#BDEF3F`, alternate row `#CDF55E`, post boxes `#D6F77D`, inputs `#DDF99A`, bars `#000` with lime text.
+- Font: Courier Prime (typewriter) everywhere. ALL text pure `#000` (on black bars: `#BDEF3F`). No grey text.
+- Full width, left aligned. Only the home banner block is centred.
+- No scroll boxes or scrollbars inside the page. No side panels. One story per row.
+- Old-school forum feel: brackets for links `[reply]`, `>` greentext shown in italics (not green), `>>12345` underlined quote links, `No.` numbers, `(OP)` marker, `ID:` per post, timestamps like `10/24/26(Sat)02:30:41`.
+- Do NOT copy 4chan's or anyone's artwork. The mascot is our own ASCII face.
+- Keep page copy minimal. The only explanatory text on the home page is the three greentext lines: `>be you` / `>want to know what the internet is actually saying` / `>read every forum at once, minus the slurs`.
+
+## Home (`design/Main.dc.html`)
+Row 1: small bracket board list left, `[Settings] [Search] [Mobile] [Home]` right. Black bar: `>nicechan | hot | new | past | sources | about | login` and `safe mode: on` toggle. Centered banner: ASCII mascot in a box, `/news/ - The World, All at Once`, `[Post a Take]`. Then the three greentext lines, then ONE table in a thick black border with a black header row: `Story | Forums | Replies | Views | Last post`. Each row: number, ▲, title link, `[HOT!]`/`[NEW!]` badge, line `(domain) N points by user, age | AI rundown | read thread | hide`, forums list, reply count, view count, last post age and author. Rows alternate lime shades with a 1px black rule. Nothing below the table. Keep the `AI rundown` label (AI content must be labelled).
+
+## Story page (`design/Story.dc.html`)
+Same top rows. Black title bar with the story title and domain, info line (forums, replies, views, started by, `[Return] [Bottom] [Update]`). Then the first post, `No.1 (OP)`, authored `Nice Chan [AI summary]`: a short note on what this is and why people are discussing it, plus a closed `<details>` called `[+] Explain it to me` containing: what is happening, per-forum agreement bars with the "is it worth it" poll (localStorage only), vertical ASCII diagrams, key word definitions. Then a black `Replies` bar with filters `[all] [Hacker News] [Lemmy] [4chan] [Nice Chan]`, then EVERY comment from every source in time order as shrink-to-fit post boxes with a `>>` marker in the left margin, header line (checkbox, name, `[forum]` tag with colour square, timestamp, No., ▶, backlinks to later posts that quote it, `[reply] [quote]`), body, `[report]`. Nice Chan visitor replies are nested under the post they answer, tagged `[Nice Chan]`. Last, a `Post a Reply` box (name, comment, Post). Never show only a sample of comments; show all of them (with pagination if a thread is very long).
+
+## Thread page (`design/Thread.dc.html`)
+Single-source thread, same post boxes. Blurred word click-to-reveal driven by the Safe mode toggle. A `tech note` with an ASCII diagram and definitions appears after a post that mentions a technical term (AI-generated, labelled).
+
+## Mobile (`design/Mobile.dc.html`)
+Phone layout of the home page: the table collapses to stacked rows.
+
+## Source colours
+Hacker News `#E4600A`, 4chan `#AF0A0F`, Lemmy `#0A7C8F`, Manifold `#6A47E0`, LessWrong `#3A7A1E`, Nice Chan `#0E5B20`. Used only for the small ■ marker; text stays black.
+
+## Build approach (do this, it keeps the server simple)
+Inspired by finbar.co: render the digest, home and story pages as static HTML on a schedule (a small `render` script plus plain templates, no client framework, no build step on the client). Only native comments, reports, admin and the poll need a live server. The page must work with JavaScript off for reading; JS only adds the Safe-mode toggle, filters, reply forms and `localStorage` poll.
+
+## Order of work
+Keep Milestones 1-5 above, but build the UI to match `design/` from Milestone 2 onward.

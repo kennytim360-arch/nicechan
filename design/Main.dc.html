@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nice Chan</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+body{margin:0;background:#BDEF3F}
+a{color:#000;text-decoration:none}
+a:hover{text-decoration:underline}
+.t{font-weight:700}
+.t:visited{color:#4A5A1A}
+a:focus-visible,button:focus-visible{outline:3px solid #000;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; background: #BDEF3F; color: #000000; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 16px; line-height: 24px">
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; padding: 4px 24px; font-size: 13px; line-height: 20px"><span>[<a href="Main.dc.html">all</a> / <a href="Main.dc.html">hn</a> / <a href="Main.dc.html">4chan</a> / <a href="Main.dc.html">lemmy</a> / <a href="Main.dc.html">manifold</a> / <a href="Main.dc.html">lw</a>]</span><span>[<a href="Main.dc.html">Settings</a>] [<a href="Main.dc.html">Search</a>] [<a href="Main.dc.html">Mobile</a>] [<a href="Main.dc.html">Home</a>]</span></div>
+<header style="padding: 12px 24px; background: #000000; color: #BDEF3F">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 24px">
+<a href="Main.dc.html" style="color: #BDEF3F; font-size: 20px; font-weight: 700">&gt;nicechan</a>
+<nav style="display: flex; flex-wrap: wrap; gap: 0 8px; color: #BDEF3F">
+<a href="Main.dc.html" style="color: #BDEF3F; font-weight: 700">hot</a><span>|</span><a href="Main.dc.html" style="color: #BDEF3F">new</a><span>|</span><a href="Main.dc.html" style="color: #BDEF3F">past</a><span>|</span><a href="Main.dc.html" style="color: #BDEF3F">sources</a><span>|</span><a href="Main.dc.html" style="color: #BDEF3F">about</a><span>|</span><a href="Main.dc.html" style="color: #BDEF3F">login</a>
+</nav>
+<button type="button" aria-pressed="true" style="margin-left: auto; border: 0; background: transparent; padding: 0; font: inherit; color: #BDEF3F; cursor: pointer">safe mode: <b>on</b></button>
+</div>
+</header>
+
+<main style="padding: 24px 24px 72px">
+
+<div style="margin: 24px auto 0; width: 360px; max-width: 100%; border: 1px solid #000; background: #D6F77D; padding: 8px 0; text-align: center">
+<pre aria-label="Nice Chan mascot, a smiling round face" style="margin: 0; display: inline-block; text-align: left; font: inherit; font-size: 15px; line-height: 18px">{{mascot}}</pre>
+</div>
+<h1 style="margin: 16px 0 0; font-size: 36px; line-height: 48px; font-weight: 700; text-align: center">/news/ - The World, All at Once</h1>
+<div aria-hidden="true" style="margin: 8px auto 0; width: 90%; border-top: 1px solid #000"></div>
+<div style="margin: 16px 0 0; font-size: 28px; line-height: 36px; font-weight: 700; text-align: center">[<a href="Main.dc.html">Post a Take</a>]</div>
+<div aria-hidden="true" style="margin-top: 8px; border-top: 1px solid #000"></div>
+
+<div style="margin-top: 24px; max-width: 80ch">
+<div>&gt;be you</div>
+<div>&gt;want to know what the internet is actually saying</div>
+<div>&gt;read every forum at once, minus the slurs</div>
+</div>
+
+<div style="height: 24px"></div>
+
+<div style="border: 2px solid #000">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 190px 80px 80px 170px; background: #000; color: #BDEF3F; font-weight: 700; padding: 6px 10px; gap: 0 12px">
+<div>Story</div><div>Forums</div><div style="text-align: center">Replies</div><div style="text-align: center">Views</div><div>Last post</div>
+</div>
+<sc-for list="{{stories}}" as="s" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 190px 80px 80px 170px; gap: 0 12px; padding: 10px; border-top: 1px solid #000; background: {{s.bg}}; align-items: start">
+<div style="min-width: 0">
+<div><span>{{s.rank}}</span> <span aria-hidden="true">&#9650;</span> <a href="{{s.href}}" class="t" style="font-size: 17px; text-decoration: underline">{{s.title}}</a> <span style="font-weight: 700">{{s.badge}}</span></div>
+<div style="font-size: 13px; line-height: 18px; padding-left: 4ch">({{s.domain}}) {{s.points}} points by {{s.by}}, {{s.age}}<sc-if value="{{s.hasRundown}}" hint-placeholder-val="{{ false }}"> | <a href="Story.dc.html" style="font-weight: 700; text-decoration: underline">AI rundown</a></sc-if> | <a href="{{s.discuss}}" style="text-decoration: underline">read thread</a> | <a href="Main.dc.html">hide</a></div>
+</div>
+<div style="font-size: 13px; line-height: 18px; white-space: pre-line">{{s.forumsList}}</div>
+<div style="text-align: center; font-weight: 700">{{s.n}}</div>
+<div style="text-align: center">{{s.views}}</div>
+<div style="font-size: 13px; line-height: 18px">{{s.lastAge}}<br>by <b>{{s.lastBy}}</b></div>
+</div>
+</sc-for>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const out = {
+      mascot: ['    ,---------.    ', '   /  ^     ^  \\   ', '  |      \\_/    |  ', '   \\    nice!   /   ', '    `---------\'    '].join('\n'),
+      eq: '='.repeat(160),
+      stories: [
+        { rank: '1.', badge: '[HOT!]', hasPrev: true, file: 'dagger-logo.png (24 KB, 512x512)', op: 'Dagger just hit 1.0 beta. Is it worth switching your CI?', prev: [{ who: 'Anonymous', tag: '[4chan /g/]', no: 'No.9120344', text: '>another build tool that will be abandoned in three years', st: 'italic' }, { who: 'kelpie', tag: '[Hacker News]', no: 'No.8839', text: '>>8838 Does it cache between runs?', st: 'normal' }], omit: '12 earlier replies omitted.', title: 'Dagger 1.0 Beta', domain: 'dagger.io', points: '212', by: 'ferrous_14', forumsText: '3 forums: HN, Lemmy, 4chan /g/', comments: '14 comments', age: '10 minutes ago', hasRundown: true, href: 'Story.dc.html', discuss: 'Story.dc.html' },
+        { rank: '2.', badge: '[HOT!]', hasPrev: true, file: 'market-chart.png (88 KB, 900x500)', op: '72% chance of the next president being a Democrat, says a play-money market. Discuss.', prev: [{ who: 'oddsmaker', tag: '[Manifold]', no: 'No.331', text: 'Markets are just vibes with money on.', st: 'normal' }, { who: 'dendrite', tag: '[Lemmy]', no: '#5120', text: '>>331 cope', st: 'normal' }], omit: '20 earlier replies omitted.', title: '2028: Who will win the Presidency, House, and Senate?', domain: 'manifold.markets', points: '96', by: 'oddsmaker', forumsText: '3 forums: Manifold, HN, Lemmy', comments: '22 comments', age: '12 minutes ago', hasRundown: true, href: 'Story.dc.html', discuss: 'Story.dc.html' },
+        { rank: '3.', badge: '[NEW!]', hasPrev: true, file: 'eu-flag.jpg (61 KB, 1200x800)', op: 'EU fines a messaging app over age checks. Privacy, or overreach?', prev: [{ who: 'brusselsprout', tag: '[Hacker News]', no: 'No.9001', text: 'Fine is 0.4% of revenue. Rounding error.', st: 'normal' }, { who: 'Anonymous', tag: '[4chan /pol/]', no: 'No.9120901', text: '>everyone loses their anonymity to protect the children', st: 'italic' }], omit: '61 earlier replies omitted.', title: 'EU fines messaging app over age checks', domain: 'reuters.com', points: '188', by: 'brusselsprout', forumsText: '3 forums: HN, Lemmy, 4chan /pol/', comments: '63 comments', age: '31 minutes ago', hasRundown: true, href: 'Story.dc.html', discuss: 'Story.dc.html' },
+        { rank: '4.', badge: '[NEW!]', hasPrev: true, file: 'benchmark.png (47 KB, 1024x640)', op: 'New open-weights model beats last year\'s flagship on coding tests.', prev: [{ who: 'tensorfan', tag: '[Hacker News]', no: 'No.9120', text: 'Benchmarks are not the job.', st: 'normal' }, { who: 'Anonymous', tag: '[4chan /g/]', no: 'No.9121', text: 'local models won', st: 'italic' }], omit: '116 earlier replies omitted.', title: "New open-weights model beats last year's flagship on coding tests", domain: 'arxiv.org', points: '301', by: 'tensorfan', forumsText: '3 forums: HN, LessWrong, 4chan /g/', comments: '118 comments', age: '44 minutes ago', hasRundown: true, href: 'Story.dc.html', discuss: 'Story.dc.html' },
+        { rank: '5.', badge: '', hasPrev: true, file: 'city-hall.jpg (92 KB, 1600x900)', op: 'Rent control vote passes in a mid-sized city.', prev: [{ who: 'lease_end', tag: '[Lemmy]', no: '#7712', text: 'Finally. Now watch the landlords sue.', st: 'normal' }, { who: 'econ_bro', tag: '[Hacker News]', no: 'No.9344', text: 'Supply is the whole story.', st: 'normal' }], omit: '37 earlier replies omitted.', title: 'Rent control vote passes in a mid-sized city', domain: 'apnews.com', points: '74', by: 'lease_end', forumsText: '2 forums: Lemmy, HN', comments: '39 comments', age: '1 hour ago', hasRundown: true, href: 'Story.dc.html', discuss: 'Story.dc.html' },
+        { rank: '6.', badge: '[NEW!]', title: 'Show HN: Privacy Meridian, navigate global privacy laws', domain: 'privacymeridian.org', points: '3', by: 'meridian_dev', forumsText: '1 forum: HN', comments: '0 comments', age: '7 minutes ago', hasRundown: false, href: 'Thread.dc.html', discuss: 'Thread.dc.html' },
+        { rank: '7.', badge: '', title: 'Malaria Parasite Caught in the Act of Breaking and Entering', domain: 'quantamagazine.org', points: '41', by: 'quanta_fan', forumsText: '1 forum: HN', comments: '0 comments', age: '10 minutes ago', hasRundown: false, href: 'Thread.dc.html', discuss: 'Thread.dc.html' },
+        { rank: '8.', badge: '', title: 'Why does every airline app need my passport number?', domain: 'lemmy.world', points: '57', by: 'gatecrash', forumsText: '1 forum: Lemmy', comments: '12 comments', age: '2 hours ago', hasRundown: false, href: 'Thread.dc.html', discuss: 'Thread.dc.html' }
+      ],
+      sources: [
+        { name: 'Hacker News', threads: '1,402', last: '2 minutes ago', dot: '#E4600A', about: 'Technology, startups and science. Threaded comments, mostly from people who work in tech.' },
+        { name: '4chan', threads: '318', last: 'just now', dot: '#AF0A0F', about: 'Anonymous imageboard. Fast, blunt, full of jokes. Only a few boards are read, with rude words and images blurred.' },
+        { name: 'Lemmy', threads: '2,090', last: '5 minutes ago', dot: '#0A7C8F', about: 'Reddit-style communities on many independent servers. Nice Chan reads programming.dev and lemmy.world.' },
+        { name: 'Manifold', threads: '764', last: '9 minutes ago', dot: '#6A47E0', about: 'A prediction market where people bet play money on whether things will happen.' },
+        { name: 'LessWrong', threads: '121', last: '31 minutes ago', dot: '#3A7A1E', about: 'A forum about reasoning, decisions and AI, with long careful posts.' }
+      ]
+    };
+    const views = ['3,812', '2,104', '5,990', '8,433', '1,276', '88', '240', '905'];
+    const last = [['kelpie', '2 min ago'], ['dendrite', '3 min ago'], ['Anonymous', '9 min ago'], ['Anonymous', '12 min ago'], ['econ_bro', '27 min ago'], ['Anonymous', '7 min ago'], ['Anonymous', '10 min ago'], ['gatecrash', '1 hour ago']];
+    out.stories = out.stories.map((st, i) => {
+      const names = st.forumsText.split(': ')[1].split(', ').map(x => (x === 'HN' ? 'Hacker News' : x));
+      return Object.assign({}, st, {
+        bg: i % 2 ? '#CDF55E' : '#BDEF3F',
+        forumsList: names.map(n => '\u25A0 ' + n).join('\n'),
+        n: String(parseInt(st.comments, 10)),
+        views: views[i], lastBy: last[i][0], lastAge: last[i][1]
+      });
+    });
+    return out;
+  }
+}
+</script>
+</body>
+</html>
