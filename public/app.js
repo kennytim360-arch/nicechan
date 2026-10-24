@@ -304,6 +304,102 @@
     $("#retry").onclick = () => route();
   }
 
+
+  // ----- Digest: stories that span two or more sources -----
+  async function showDigestList(token) {
+    const d = await api("/digest");
+    if (token !== state.token) return;
+    state.mode = "page";
+    document.title = "Digest · Nice Chan";
+    const job = d.job?.last?.at ? `Last update ${ago(d.job.last.at)}.` : "First update is running.";
+    const notice = d.aiEnabled
+      ? `<p class="note">AI-generated summaries are labelled as such. Check the sources. ${job}</p>`
+      : `<p class="note">[AI rundowns are off] Set ANTHROPIC_API_KEY to add per-community framing. Stories below show each community’s threads with links. ${job}</p>`;
+    const rows = d.items.map(st => `
+      <div class="trow${st.rare ? " rare-row" : ""}">
+        <div class="c-title">
+          <div>${st.rare ? `<span class="rare">[RARE: ${esc(st.rare)}]</span> ` : ""}<a class="story-title" href="#/digest/${enc(st.id)}">${esc(st.label)}</a></div>
+          <div class="story-meta">${st.status === "ready" ? "[AI rundown]" : "[threads only]"} | ${st.sources.map(s => esc(srcShort(s))).join(", ")}</div>
+        </div>
+        <div class="c-forums">${st.sources.map(s => `<span class="sq" style="color:${srcColor(s)}">&#9632;</span> ${esc(srcName(s))}`).join("<br>")}</div>
+        <div class="c-replies">${esc(st.itemCount)}</div>
+        <div class="c-views">–</div>
+        <div class="c-last">${esc(ago(st.lastTime))}</div>
+      </div>`).join("");
+    view.innerHTML = `
+      <h2 class="page-title">&gt;digest</h2>
+      ${notice}
+      <div class="table">
+        <div class="trow thead" aria-hidden="true"><div>Story</div><div>Forums</div><div class="c-replies">Threads</div><div class="c-views">Views</div><div>Last update</div></div>
+        ${rows || `<p class="empty">No shared stories yet. They appear after the first ingest finds the same event on two or more sources.</p>`}
+      </div>`;
+  }
+
+  async function showDigestStory(id, token) {
+    const d = await api(`/digest/${enc(id)}`);
+    if (token !== state.token) return;
+    state.mode = "page";
+    const p = d.payload;
+    const ready = d.status === "ready";
+    document.title = `${d.label} · Digest · Nice Chan`;
+    const rare = d.rare ? `<span class="rare">[RARE: ${esc(d.rare)}]</span>` : "";
+    const aiBox = ready
+      ? `<section class="ai"><p class="ai-tag">[AI summary] Written by ${esc(p.model)} on ${esc(stamp(p.generatedAt))}. Check the sources.</p><p>${esc(p.summary)}</p></section>`
+      : `<section class="ai"><p class="ai-tag">[AI framing not available]</p><p>${esc(p.reason || "No framing yet.")}</p></section>`;
+
+    const communities = ready
+      ? p.communities.map(c => ({ key: c.key, claims: c.claims, tone: c.tone, blame: c.blame, quotes: c.quotes }))
+      : [];
+    const rawByKey = new Map((p.raw || []).map(g => [g.key, g]));
+    const columns = (p.raw || []).map(g => {
+      const framed = communities.find(c => c.key === g.key);
+      const [src, ...rest] = g.key.split("/");
+      return `
+        <div class="post column">
+          <header class="post-head"><span class="name">${esc(commTitleFrom(src, rest.join("/")))}</span> <span>${tag(src)}</span> <span>${esc(g.count)} threads</span></header>
+          ${framed ? `
+            <p><b>Claims:</b></p><ul>${framed.claims.map(c => `<li>${esc(c)}</li>`).join("")}</ul>
+            <p><b>Tone:</b> ${esc(framed.tone)}</p>
+            <p><b>Blame or credit:</b> ${esc(framed.blame)}</p>
+            <p><b>In their words:</b></p>
+            ${framed.quotes.map(q => `<blockquote>&ldquo;${esc(q.quote)}&rdquo; ${q.url ? `<a href="${esc(q.url)}" target="_blank" rel="noopener noreferrer">[source post ↗]</a>` : ""}</blockquote>`).join("")}
+          ` : `<p class="muted-line">Threads only: AI framing is not available for this community yet.</p>`}
+          <p><b>Threads:</b></p>
+          <ul>${g.threads.map(t => `<li><a href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">${esc(t.title || t.excerpt || "(no title)")}</a> <span class="muted-line">by ${esc(t.author)}, ${esc(ago(t.time))}</span></li>`).join("")}</ul>
+        </div>`;
+    }).join("");
+
+    const agree = ready ? `
+      <section class="ai">
+        <p class="ai-tag">[AI] Common ground</p>
+        <p>${esc(p.commonGround)}</p>
+        ${p.minorityCarried ? `<p class="minority">${esc(p.minorityNote)}</p>` : ""}
+      </section>
+      <section class="ai">
+        <p class="ai-tag">[AI] Where they split</p>
+        <ol>${(p.disagreements || []).map(x => `<li><b>${esc(x.topic)}</b><ul>${Object.entries(x.sides || {}).map(([k, v]) => `<li>${esc(k)}: ${esc(v)}</li>`).join("")}</ul></li>`).join("")}</ol>
+      </section>` : "";
+
+    view.innerHTML = `
+      <div class="thread-head">
+        <div><a href="#/digest">[back to digest]</a></div>
+        <div class="title">${esc(d.label)} ${rare}</div>
+        <div class="info">${d.sources.map(s => tag(s)).join(" ")} | ${esc(d.itemCount)} threads | last update ${esc(ago(d.lastTime))}</div>
+      </div>
+      ${aiBox}
+      ${agree}
+      <h2 class="comments-h">&gt;each community</h2>
+      <p class="note">Each column is one community. Quotes are excerpts copied from its posts, with a link to the post.</p>
+      <div class="columns">${columns}</div>`;
+    window.scrollTo({ top: 0 });
+  }
+
+  // Board or community label for digest columns.
+  function commTitleFrom(src, comm) {
+    const t = commTitle(src, comm);
+    return src === "4chan" ? `/${comm}/ ${t}` : t;
+  }
+
   async function route() {
     const token = ++state.token;
     const parts = parse();
@@ -313,6 +409,10 @@
     view.innerHTML = '<p class="loading">Loading…</p>';
     try {
       if (!source) await showHome(token);
+      else if (source === "digest") {
+        if (community) await showDigestStory(community, token);
+        else await showDigestList(token);
+      }
       else if (source === "s" && community) await showHome(token, community);
       else if (source === "sources" && !community) showSources();
       else if (source === "about" && !community) showAbout();

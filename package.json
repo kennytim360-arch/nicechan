@@ -4,10 +4,13 @@
   "private": true,
   "description": "Read public forum discussions side by side, with safe mode on by default.",
   "type": "commonjs",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=22.5"
+  },
   "scripts": {
-    "start": "node server.js",
-    "test": "node --test test/text.test.js test/filter.test.js test/adapters.test.js",
-    "record": "node scripts/record-fixtures.js"
+    "start": "node --env-file-if-exists=.env server.js",
+    "test": "node --test test/text.test.js test/filter.test.js test/adapters.test.js test/digest.test.js",
+    "record": "node scripts/record-fixtures.js",
+    "ingest": "node scripts/ingest.js"
   }
 }

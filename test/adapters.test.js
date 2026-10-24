@@ -99,6 +99,7 @@ test("adapters refuse communities that are not configured", async () => {
   await assert.rejects(() => hn.fetchRecent("best", 5), /unknown community/);
   const lemmy = makers.lemmy(config.sources.lemmy);
   await assert.rejects(() => lemmy.fetchRecent("evil.example/technology", 5), /not configured/);
+  replay(load("4chan").records);
   const chan = makers["4chan"]({ boards: ["g"] });
   await assert.rejects(() => chan.fetchRecent("b", 5), /not enabled/);
 });

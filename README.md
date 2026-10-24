@@ -29,6 +29,23 @@ Layout and copy follow the approved mockups in `design/` (see `AGENTS.md`).
 
 Not built yet: AI rundowns and digest pages (Milestones 3 and 4), native "Post a Take" comments and story rooms (Milestone 5), and view counts, which no source API provides, so the Views column shows a dash.
 
+## Digest: stories across sources
+
+The server runs a background job every `INGEST_MINUTES` (default 15). It does four things:
+
+1. **Ingest.** Pulls the newest threads from every enabled community, including every work-safe 4chan board, into `data/nicechan.db` (SQLite, built into Node 22.5+). Duplicates are skipped by source and post id. Threads older than 7 days are removed.
+2. **Group.** Finds threads about the same event across sources. Titles and the start of each text are compared with TF-IDF similarity and merged by centroid. A story is kept only if it has threads from two or more sources.
+3. **Frame (needs `ANTHROPIC_API_KEY`).** For each story and each community, Claude writes the main claims, tone, blame or credit, and 2 to 4 quotes. Every quote must appear word for word in the masked source post it names. If not, the model is asked again. Then one agreement step gives a common-ground statement (picked by worst-case score across communities) and three disagreements. It flags when a minority community's view changed the result.
+4. **Store.** Each story keeps its per-community threads with links even without AI. It is re-framed only when at least three new threads join it.
+
+Run it once by hand with `npm run ingest`. Add a key to `.env` (copy `.env.example`) and set `ANTHROPIC_MODEL` to change the model (default `claude-sonnet-5-5`).
+
+Safety of the digest: all text sent to the model is masked first (`f***`), and the stored digest is masked too, whatever the Safe mode toggle says.
+
+Rare combos: a story that includes `/x/` on 4chan and at least one other source is marked `[RARE]` in a distinct colour.
+
+Grouping uses lexical similarity, not embeddings. It needs no key or extra dependency. It is a single function (`lib/digest/cluster.js`) that can be swapped for embeddings later.
+
 ## Adding a source or community
 
 Sources are configured in `config.json`:

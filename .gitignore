@@ -2,3 +2,6 @@ node_modules/
 .env
 *.log
 .DS_Store
+
+# Digest database (built-in node:sqlite) and any local data
+data/

@@ -8,12 +8,19 @@ const { createRegistry } = require("./lib/sources");
 const { createLatest } = require("./lib/latest");
 const { maskItem } = require("./lib/filter");
 const { excerpt } = require("./lib/text");
+const { startDigest } = require("./lib/digest/service");
+const llm = require("./lib/digest/llm");
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC = path.join(__dirname, "public");
 const ID_RE = /^[A-Za-z0-9_.-]{1,64}$/;
 
 const registry = createRegistry(config);
+const digest = startDigest({
+  registry,
+  file: path.join(__dirname, "data", "nicechan.db"),
+  intervalMinutes: Number(process.env.INGEST_MINUTES) || 15,
+});
 const latest = createLatest(registry, config.latest);
 
 const json = (res, code, obj) => {
@@ -38,6 +45,19 @@ async function handleApi(req, res, url, rawParts) {
   const [, a, b, c] = parts; // parts[0] is "api"
 
   if (a === "sources") return json(res, 200, await registry.describe());
+
+  // Digest pages are masked when they are built, so they are not switched by Safe mode.
+  if (a === "digest") {
+    if (!b) {
+      const since = Math.floor(Date.now() / 1000) - 48 * 3600;
+      const items = digest.store.listDigests(since).map(({ payload, ...rest }) => ({ ...rest, reason: payload.reason ?? null }));
+      return json(res, 200, { aiEnabled: llm.enabled(), job: digest.status(), items });
+    }
+    if (!ID_RE.test(b)) return json(res, 400, { error: "Bad story id" });
+    const d = digest.store.getDigest(b);
+    if (!d) return json(res, 404, { error: "Story not found" });
+    return json(res, 200, d);
+  }
 
   if (a === "latest") return json(res, 200, applySafe(await latest(), safe));
 
