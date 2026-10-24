@@ -48,7 +48,7 @@ test("verifyFrame accepts verbatim quotes and rejects invented ones", () => {
   const good = {
     summary: "Dagger 1.0 beta was released.",
     communities: [
-      { community: "hn/top", claims: ["fast"], tone: "positive", blame: "none", quotes: [{ postId: "10", quote: "the cache works well" }, { postId: "10", quote: "This build is fast" }] },
+      { community: "hn", claims: ["fast"], tone: "positive", blame: "none", quotes: [{ postId: "10", quote: "the cache works well" }, { postId: "10", quote: "This build is fast" }] },
       { community: "4chan/g", claims: ["overhyped"], tone: "sceptical", blame: "the config", quotes: [{ postId: "20", quote: "it is overhyped" }, { postId: "20", quote: "the config is bad" }] },
     ],
   };
@@ -69,7 +69,7 @@ test("frameCluster retries when a quote is not verbatim, then succeeds", async (
   const items = [it("hn", "top", "10", "Dagger 1.0", "The cache works well in practice."), it("4chan", "g", "20", "dagger", "It is overhyped and the config is bad.")];
   const groups = groupByCommunity(items);
   const bad = { summary: "s", communities: [
-    { community: "hn/top", claims: ["c"], tone: "t", blame: "none", quotes: [{ postId: "10", quote: "made up words here" }, { postId: "10", quote: "cache works well" }] },
+    { community: "hn", claims: ["c"], tone: "t", blame: "none", quotes: [{ postId: "10", quote: "made up words here" }, { postId: "10", quote: "cache works well" }] },
     { community: "4chan/g", claims: ["c"], tone: "t", blame: "none", quotes: [{ postId: "20", quote: "overhyped and the config" }, { postId: "20", quote: "config is bad" }] },
   ] };
   const good = JSON.parse(JSON.stringify(bad));
@@ -92,11 +92,11 @@ test("masked words are never sent to the model", async () => {
 });
 
 test("common ground picks the best worst-case candidate", () => {
-  const counts = { "hn/top": 10, "4chan/g": 10, "lemmy/technology": 10 };
+  const counts = { "hn": 10, "4chan/g": 10, "lemmy/technology": 10 };
   const scores = [
-    { "hn/top": 5, "4chan/g": 1, "lemmy/technology": 5 },
-    { "hn/top": 4, "4chan/g": 3, "lemmy/technology": 4 },
-    { "hn/top": 2, "4chan/g": 5, "lemmy/technology": 2 },
+    { "hn": 5, "4chan/g": 1, "lemmy/technology": 5 },
+    { "hn": 4, "4chan/g": 3, "lemmy/technology": 4 },
+    { "hn": 2, "4chan/g": 5, "lemmy/technology": 2 },
   ];
   const pick = chooseCommonGround(["a", "b", "c"], scores, counts);
   assert.equal(pick.text, "b");
@@ -106,11 +106,11 @@ test("common ground picks the best worst-case candidate", () => {
 
 test("flags when a minority community decides the common ground", () => {
   // 4chan is the minority (2 of 22 threads). Only its low score keeps "a" from winning.
-  const counts = { "hn/top": 10, "lemmy/technology": 10, "4chan/g": 2 };
+  const counts = { "hn": 10, "lemmy/technology": 10, "4chan/g": 2 };
   const scores = [
-    { "hn/top": 5, "lemmy/technology": 5, "4chan/g": 1 },
-    { "hn/top": 4, "lemmy/technology": 4, "4chan/g": 4 },
-    { "hn/top": 3, "lemmy/technology": 3, "4chan/g": 3 },
+    { "hn": 5, "lemmy/technology": 5, "4chan/g": 1 },
+    { "hn": 4, "lemmy/technology": 4, "4chan/g": 4 },
+    { "hn": 3, "lemmy/technology": 3, "4chan/g": 3 },
   ];
   const pick = chooseCommonGround(["a", "b", "c"], scores, counts);
   assert.equal(pick.text, "b");
@@ -119,15 +119,15 @@ test("flags when a minority community decides the common ground", () => {
 });
 
 test("verifyConsensus enforces 3 candidates, scores 1-5 and 3 disagreements", () => {
-  const framed = [{ key: "hn/top" }, { key: "4chan/g" }];
+  const framed = [{ key: "hn" }, { key: "4chan/g" }];
   const ok = {
     candidates: ["x", "y", "z"],
-    scores: [0, 1, 2].map(() => ({ scores: { "hn/top": 3, "4chan/g": 4 } })),
+    scores: [0, 1, 2].map(() => ({ scores: { "hn": 3, "4chan/g": 4 } })),
     disagreements: [{ topic: "t", sides: {} }, { topic: "t", sides: {} }, { topic: "t", sides: {} }],
   };
   assert.equal(verifyConsensus(ok, framed).ok, true);
   assert.equal(verifyConsensus({ ...ok, candidates: ["x"] }, framed).ok, false);
-  assert.equal(verifyConsensus({ ...ok, scores: [{ scores: { "hn/top": 9, "4chan/g": 1 } }, ...ok.scores.slice(1)] }, framed).ok, false);
+  assert.equal(verifyConsensus({ ...ok, scores: [{ scores: { "hn": 9, "4chan/g": 1 } }, ...ok.scores.slice(1)] }, framed).ok, false);
 });
 
 test("the /x/ rare flag needs /x/ and at least one other source", () => {
@@ -162,9 +162,10 @@ test("refresh without an API key stores per-community raw views and no AI framin
   const report = await refresh({ store, env: {}, now });
   assert.equal(report.stories, 1);
   const d = store.listDigests(0)[0];
-  assert.equal(d.status, "pending");
+  assert.equal(d.status, "analysed");
   assert.equal(d.payload.raw.length, 3, "one raw view per community");
-  assert.match(d.payload.reason, /ANTHROPIC_API_KEY/);
+  assert.equal(d.payload.reason, null);
+  assert.ok(d.payload.analysis, "analysis is stored without a model");
   assert.ok(d.label.length > 0);
   assert.equal(d.rare, "rare combo", "story with /x/ and other sources is flagged rare");
   store.close();
@@ -180,14 +181,14 @@ test("refresh with a mocked model stores framed output", async () => {
   const framing = {
     summary: "Dagger 1.0 beta shipped with faster CI.",
     communities: [
-      { community: "hn/top", claims: ["fast"], tone: "positive", blame: "none", quotes: [{ postId: "1", quote: "cache works well" }, { postId: "1", quote: "The cache works well in practice" }] },
+      { community: "hn", claims: ["fast"], tone: "positive", blame: "none", quotes: [{ postId: "1", quote: "cache works well" }, { postId: "1", quote: "The cache works well in practice" }] },
       { community: "4chan/g", claims: ["overhyped"], tone: "sceptical", blame: "the config", quotes: [{ postId: "2", quote: "It is overhyped" }, { postId: "2", quote: "the config is bad" }] },
     ],
   };
   const agree = {
     candidates: ["Dagger 1.0 works for CI.", "Dagger is new.", "Dagger has a cache."],
-    scores: [0, 1, 2].map(i => ({ scores: { "hn/top": 4 - i, "4chan/g": 3 } })),
-    disagreements: [{ topic: "hype", sides: { "hn/top": "fine", "4chan/g": "overhyped" } }, { topic: "config", sides: {} }, { topic: "cache", sides: {} }],
+    scores: [0, 1, 2].map(i => ({ scores: { "hn": 4 - i, "4chan/g": 3 } })),
+    disagreements: [{ topic: "hype", sides: { "hn": "fine", "4chan/g": "overhyped" } }, { topic: "config", sides: {} }, { topic: "cache", sides: {} }],
   };
   llm.setTransport(async ({ system, user }) => {
     if (user.includes("Return JSON exactly in this shape") && user.includes("candidates")) return JSON.stringify(agree);

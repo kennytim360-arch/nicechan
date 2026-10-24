@@ -29,22 +29,32 @@ Layout and copy follow the approved mockups in `design/` (see `AGENTS.md`).
 
 Not built yet: AI rundowns and digest pages (Milestones 3 and 4), native "Post a Take" comments and story rooms (Milestone 5), and view counts, which no source API provides, so the Views column shows a dash.
 
-## Digest: stories across sources
+## Stories across sources (no AI needed)
 
-The server runs a background job every `INGEST_MINUTES` (default 15). It does four things:
+The server runs a background job every `INGEST_MINUTES` (default 15). Nothing in it needs a model or an API key.
 
 1. **Ingest.** Pulls the newest threads from every enabled community, including every work-safe 4chan board, into `data/nicechan.db` (SQLite, built into Node 22.5+). Duplicates are skipped by source and post id. Threads older than 7 days are removed.
-2. **Group.** Finds threads about the same event across sources. Titles and the start of each text are compared with TF-IDF similarity and merged by centroid. A story is kept only if it has threads from two or more sources.
-3. **Frame (needs `ANTHROPIC_API_KEY`).** For each story and each community, Claude writes the main claims, tone, blame or credit, and 2 to 4 quotes. Every quote must appear word for word in the masked source post it names. If not, the model is asked again. Then one agreement step gives a common-ground statement (picked by worst-case score across communities) and three disagreements. It flags when a minority community's view changed the result.
-4. **Store.** Each story keeps its per-community threads with links even without AI. It is re-framed only when at least three new threads join it.
+2. **Group.** Threads that share a normalised link (for example the same article on Hacker News and Lemmy) start in one group. Other threads join by keyword overlap (TF-IDF similarity). A story is kept only if it has threads from two or more sources. Grouping uses lexical similarity, so threads with no shared words are not joined.
+3. **Cache.** The comments of each story's threads (up to 8 threads) are stored, so story pages load from the database.
+4. **Analyse.** For each story and forum: threads and posts, points, last post, who posts most, growth (posts in the last 6 hours against the 6 hours before), the words each forum uses most, a rough mood score from a word list, and the most upvoted comment. Links shared by more than one forum are listed.
 
-Run it once by hand with `npm run ingest`. Add a key to `.env` (copy `.env.example`) and set `ANTHROPIC_MODEL` to change the model (default `claude-sonnet-5-5`).
+Mood uses a small word list with negation handling (`lib/analysis/mood.js`). It is much rougher than VADER and misses sarcasm, slang and context. It is a tilt, not a verdict. Forums that do not publish comment scores (Hacker News, 4chan, Manifold) show no most-upvoted comment.
 
-Safety of the digest: all text sent to the model is masked first (`f***`), and the stored digest is masked too, whatever the Safe mode toggle says.
+Run it once by hand with `npm run ingest`.
+
+### Optional: AI framing
+
+Add `ANTHROPIC_API_KEY` to `.env` (copy `.env.example`) and the same stories also get a model-written summary, per-forum claims with quotes checked word for word against their source posts, common ground, and disagreements. Set `ANTHROPIC_MODEL` to change the model (default `claude-sonnet-5-5`). All text sent to the model is masked first. Without a key nothing breaks: stories show the analysis only.
 
 Rare combos: a story that includes `/x/` on 4chan and at least one other source is marked `[RARE]` in a distinct colour.
 
-Grouping uses lexical similarity, not embeddings. It needs no key or extra dependency. It is a single function (`lib/digest/cluster.js`) that can be swapped for embeddings later.
+## Moderation
+
+- **Report.** Each post has a `[report]` link. Reports are rate-limited to 10 per visitor every 10 minutes. The visitor is identified by a hash of their IP address with a salt that changes every day. Raw IP addresses are not stored.
+- **Admin page** at `/admin`. It needs `ADMIN_TOKEN` in `.env`. Without it the admin page is off. The token is only kept in the page for that visit. From the page you can hide a reported post (it then disappears from threads and stories), restore it, or mark a report dismissed or actioned.
+- **Words and images.** Safe mode masks rude words on the server and blurs images until clicked.
+
+Hiding a post here removes it from this site only. It does not change anything on the source forum.
 
 ## Adding a source or community
 

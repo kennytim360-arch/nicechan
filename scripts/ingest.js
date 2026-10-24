@@ -13,7 +13,7 @@ const path = require("path");
   const ingest = await ingestAll(registry, store);
   console.log(`ingested ${ingest.items} threads from ${ingest.targets} communities; ${ingest.failed.length} failed`);
   for (const f of ingest.failed) console.log(`  failed: ${f}`);
-  const report = await refresh({ store, env: process.env });
+  const report = await refresh({ store, env: process.env, fetchThreadPosts: (src, comm, id) => registry.get(src).fetchThread(comm, id) });
   console.log("stories:", report);
   store.close();
 })().catch(err => {

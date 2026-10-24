@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · Nice Chan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+  <header class="bar"><div class="bar-row"><a class="brand" href="#/">&gt;nicechan admin</a></div></header>
+  <main class="main">
+    <h2 class="page-title">&gt;reports</h2>
+    <p class="note">Enter the admin token. It is kept in this page only and is not stored.</p>
+    <form id="login" class="admin-form">
+      <label for="token">Admin token</label>
+      <input id="token" type="password" autocomplete="off" required>
+      <button class="btn" type="submit">[load reports]</button>
+    </form>
+    <p id="status" class="note"></p>
+    <div id="list"></div>
+  </main>
+</div>
+<script>
+(() => {
+  let token = "";
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const status = document.getElementById("status");
+  const list = document.getElementById("list");
+
+  async function call(path, body) {
+    const opts = { headers: { "x-admin-token": token } };
+    if (body) {
+      opts.method = "POST";
+      opts.headers["content-type"] = "application/json";
+      opts.body = JSON.stringify(body);
+    }
+    const r = await fetch(path, opts);
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || `Request failed (${r.status})`);
+    return d;
+  }
+
+  function render(reports) {
+    if (!reports.length) { list.innerHTML = '<p class="empty">No open reports.</p>'; return; }
+    list.innerHTML = `
+      <div class="table">
+        <div class="trow thead"><div>Post</div><div>Reports</div><div>Reason</div><div>State</div><div>Actions</div></div>
+        ${reports.map(r => `
+          <div class="trow">
+            <div class="c-title">
+              <div>${esc(r.source)} · No.${esc(r.post_id)}</div>
+              <div class="story-meta">${esc(r.text || "(text not cached)").slice(0, 240)}</div>
+              ${r.url ? `<div class="story-meta"><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">[original ↗]</a></div>` : ""}
+            </div>
+            <div class="c-replies">${esc(r.count)}</div>
+            <div class="c-forums">${esc(r.reason || "–")}</div>
+            <div class="c-views">${r.hidden ? "hidden" : "visible"}</div>
+            <div class="c-last">
+              ${r.hidden
+                ? `<button class="act" data-act="restore" data-source="${esc(r.source)}" data-post="${esc(r.post_id)}">[restore]</button>`
+                : `<button class="act" data-act="hide" data-source="${esc(r.source)}" data-post="${esc(r.post_id)}">[hide post]</button>`}
+              <br><button class="act" data-act="dismissed" data-id="${esc(r.id)}">[dismiss]</button>
+              <br><button class="act" data-act="actioned" data-id="${esc(r.id)}">[actioned]</button>
+            </div>
+          </div>`).join("")}
+      </div>`;
+  }
+
+  async function load() {
+    const d = await call("/api/admin/reports");
+    status.textContent = `${d.reports.length} open report(s).`;
+    render(d.reports);
+  }
+
+  document.getElementById("login").addEventListener("submit", async e => {
+    e.preventDefault();
+    token = document.getElementById("token").value;
+    try { await load(); } catch (err) { status.textContent = err.message; list.innerHTML = ""; }
+  });
+
+  list.addEventListener("click", async e => {
+    const b = e.target.closest("button[data-act]");
+    if (!b) return;
+    try {
+      if (b.dataset.act === "hide" || b.dataset.act === "restore") {
+        await call(`/api/admin/${b.dataset.act === "hide" ? "hide" : "restore"}`, { source: b.dataset.source, postId: b.dataset.post, reason: "reported" });
+      } else {
+        await call("/api/admin/resolve", { id: Number(b.dataset.id), status: b.dataset.act });
+      }
+      await load();
+    } catch (err) {
+      status.textContent = err.message;
+    }
+  });
+})();
+</script>
+</body>
+</html>
