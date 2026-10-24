@@ -42,6 +42,8 @@
     sources: [],
     items: [],
     stories: new Map(), // "source:threadId" -> story id, for the "AI rundown" links
+    digests: [],
+    showStories: false,
     mode: "list",
     token: 0,
     safe: localStorage.getItem("safe") !== "0",
@@ -151,32 +153,55 @@
       </div>`;
   }
 
-  function tableHTML(items) {
-    if (!items.length) return `<p class="empty">Nothing to show here.</p>`;
+  // A story that spans forums, as one row: every forum it draws from is listed.
+  function mergedRow(st, i) {
+    const forums = st.sources.map(s => `<span class="sq" style="color:${srcColor(s)}">&#9632;</span> ${esc(srcName(s))}`).join("<br>");
+    return `
+      <div class="trow merged${st.rare ? " rare-row" : ""}">
+        <div class="c-title">
+          <div><span class="rank">${i + 1}.</span> <span class="badge-tag">[STORY]</span> <a class="story-title" href="#/digest/${enc(st.id)}">${esc(st.label)}</a>${st.rare ? ` <span class="rare">[RARE: ${esc(st.rare)}]</span>` : ""}</div>
+          <div class="story-meta">${esc(plural(st.itemCount, "thread", "threads"))} across ${esc(plural(st.sources.length, "forum", "forums"))} | <a href="#/digest/${enc(st.id)}"><b>read the story</b></a></div>
+        </div>
+        <div class="c-forums">${forums}</div>
+        <div class="c-replies">–</div>
+        <div class="c-views">–</div>
+        <div class="c-last">${esc(ago(st.lastTime))}</div>
+      </div>`;
+  }
+
+  function tableHTML(items, stories = []) {
+    if (!items.length && !stories.length) return `<p class="empty">Nothing to show here.</p>`;
+    const rows = stories.map(mergedRow).concat(items.map(storyRow));
     return `
       <div class="table">
         <div class="trow thead" aria-hidden="true">
           <div>Story</div><div>Forums</div><div class="c-replies">Replies</div><div class="c-views">Views</div><div>Last post</div>
         </div>
-        ${items.map(storyRow).join("")}
+        ${rows.join("")}
       </div>`;
   }
 
   function applyFilter() {
     const q = filterInput.value.trim().toLowerCase();
-    const shown = q
-      ? state.items.filter(it => `${it.title} ${it.text} ${it.author} ${it.url}`.toLowerCase().includes(q))
-      : state.items;
+    const matches = it => `${it.title} ${it.text} ${it.author} ${it.url}`.toLowerCase().includes(q);
+    let items = q ? state.items.filter(matches) : state.items;
+    let stories = [];
+    if (state.showStories) {
+      // Threads that belong to a merged story appear in that story's row instead.
+      if (!q) items = items.filter(it => !state.stories.has(`${it.source}:${it.threadId}`));
+      stories = (state.digests || []).filter(st => st.sources.length >= 2 && (!q || st.label.toLowerCase().includes(q)));
+    }
     const holder = $("#table-holder");
-    if (holder) holder.innerHTML = tableHTML(shown);
+    if (holder) holder.innerHTML = tableHTML(items, stories);
     const count = $("#count");
-    if (count) count.textContent = q ? `${shown.length} of ${state.items.length} shown` : "";
+    if (count) count.textContent = q ? `${items.length + stories.length} shown` : "";
   }
 
   // Fetches the stories once, so rows can link to them.
   async function loadStories() {
     try {
       const d = await api("/digest");
+      state.digests = d.items;
       state.stories = new Map();
       for (const s of d.items) for (const m of s.members) state.stories.set(m, s.id);
     } catch {
@@ -194,6 +219,7 @@
     if (source) items = items.filter(it => it.source === source);
     if (sort === "hot") items = items.slice().sort((a, b) => ((b.score ?? 0) + (b.meta?.replies ?? 0)) - ((a.score ?? 0) + (a.meta?.replies ?? 0)));
     state.items = items;
+    state.showStories = !source && (sort === "hot" || sort === "new");
     state.mode = "list";
     document.title = `${title} · Nice Chan`;
     const notice = data.errors?.length
