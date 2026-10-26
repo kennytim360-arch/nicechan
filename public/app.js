@@ -44,6 +44,9 @@
     stories: new Map(), // "source:threadId" -> story id, for the "AI rundown" links
     digests: [],
     showStories: false,
+    sortBy: "hot",
+    page: 0,
+    rowCount: 0,
     mode: "list",
     token: 0,
     safe: localStorage.getItem("safe") !== "0",
@@ -129,72 +132,128 @@
     boards.innerHTML = "[" + links.join(" / ") + "]";
   }
 
-  // ----- Thread rows (hot, new, past, source and community listings) -----
+  // ----- Home table: one list. Stories and single threads are ranked together, 30 rows a page. -----
+  const PAGE_ROWS = 30;
+  const HOUR = 3600;
+  const nowSec = () => Date.now() / 1000;
+  // Hot rank: points divided by age, so a high-scoring post stays up for a while and then sinks.
+  const hotRank = (points, time) => (points || 0) / Math.pow((nowSec() - time) / HOUR + 2, 1.5);
+  // [HOT!]: under 48 hours old and high-scoring. [NEW!]: under an hour old.
+  const hotBadge = (points, time) => (nowSec() - time < 48 * HOUR && (points || 0) >= 50 ? "[HOT!]" : nowSec() - time < HOUR ? "[NEW!]" : "");
+  const normTitle = s => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const normUrl = u => { try { const x = new URL(u); return (x.hostname.replace(/^www\./, "") + x.pathname.replace(/\/+$/, "")).toLowerCase(); } catch { return ""; } };
+
+  // A single thread row: title, forum, real replies, last post.
   function storyRow(it, i) {
     const m = it.meta ?? {};
-    const hot = (it.score ?? 0) >= 100 || (m.replies ?? 0) >= 100;
-    const fresh = Date.now() / 1000 - it.time < 3600;
-    const badge = hot ? "[HOT!]" : fresh ? "[NEW!]" : "";
+    const points = it.score ?? m.replies ?? 0;
+    const badge = hotBadge(points, it.time);
     const domain = m.externalUrl ? host(m.externalUrl) : host(it.url);
-    const points = it.score != null ? `${esc(it.score)} points ` : "";
     const threadHref = `#/${enc(it.source)}/${enc(it.community)}/${enc(it.threadId)}`;
     const storyId = state.stories.get(`${it.source}:${it.threadId}`);
     const rundown = storyId ? ` | <a href="#/digest/${enc(storyId)}"><b>AI rundown</b></a>` : "";
+    const scoreText = it.score != null ? `${esc(it.score)} points ` : "";
     return `
       <div class="trow">
         <div class="c-title">
-          <div><span class="rank">${i + 1}.</span> <span aria-hidden="true">&#9650;</span> <a class="story-title" href="${threadHref}">${esc(it.title || snippet(it.text) || "(no title)")}</a> <span class="badge-tag">${badge}</span></div>
-          <div class="story-meta">(${esc(domain)}) ${points}${it.author ? `by ${esc(it.author)}, ` : ""}${esc(ago(it.time))}${rundown} | <a href="${threadHref}">read thread</a></div>
+          <div><span class="rank">${i}.</span> <span aria-hidden="true">&#9650;</span> <a class="story-title" href="${threadHref}">${esc(it.title || snippet(it.text) || "(no title)")}</a> <span class="badge-tag">${badge}</span></div>
+          <div class="story-meta">(${esc(domain)}) ${scoreText}${it.author ? `by ${esc(it.author)}, ` : ""}${esc(ago(it.time))}${rundown} | <a href="${threadHref}">read thread</a></div>
         </div>
         <div class="c-forums"><span class="sq" style="color:${srcColor(it.source)}">&#9632;</span> ${esc(srcName(it.source))}</div>
         <div class="c-replies">${m.replies != null ? esc(m.replies) : "–"}</div>
-        <div class="c-views">–</div>
         <div class="c-last">${esc(ago(it.time))}<br>by <b>${esc(it.author || "Anonymous")}</b></div>
       </div>`;
   }
 
-  // A story that spans forums, as one row: every forum it draws from is listed.
+  // A story that spans forums, as one row: every forum it draws from is listed. Replies are the real total.
   function mergedRow(st, i) {
     const forums = st.sources.map(s => `<span class="sq" style="color:${srcColor(s)}">&#9632;</span> ${esc(srcName(s))}`).join("<br>");
+    const tagged = st.labelSource ? ` <span class="rare">[${esc(st.labelSource)}]</span>` : "";
     return `
-      <div class="trow merged${st.rare ? " rare-row" : ""}">
+      <div class="trow merged">
         <div class="c-title">
-          <div><span class="rank">${i + 1}.</span> <span class="badge-tag">[STORY]</span> <a class="story-title" href="#/digest/${enc(st.id)}">${esc(st.label)}</a>${st.rare ? ` <span class="rare">[RARE: ${esc(st.rare)}]</span>` : ""}</div>
+          <div><span class="rank">${i}.</span> <span class="badge-tag">${hotBadge(st.points, st.lastTime) || "[STORY]"}</span> <a class="story-title" href="#/digest/${enc(st.id)}">${esc(st.label)}</a>${tagged}</div>
           <div class="story-meta">${esc(plural(st.itemCount, "thread", "threads"))} across ${esc(plural(st.sources.length, "forum", "forums"))} | <a href="#/digest/${enc(st.id)}"><b>read the story</b></a></div>
         </div>
         <div class="c-forums">${forums}</div>
-        <div class="c-replies">–</div>
-        <div class="c-views">–</div>
+        <div class="c-replies">${esc(st.replies)}</div>
         <div class="c-last">${esc(ago(st.lastTime))}</div>
       </div>`;
   }
 
-  function tableHTML(items, stories = []) {
-    if (!items.length && !stories.length) return `<p class="empty">Nothing to show here.</p>`;
-    const rows = stories.map(mergedRow).concat(items.map(storyRow));
+  // The one ranked list: stories first, then single threads that are not in a story. Dedupes and caps authors.
+  function homeRows(items, stories, sortBy) {
+    const q = filterInput.value.trim().toLowerCase();
+    const seenUrl = new Set();
+    const seenTitle = new Set();
+    const perAuthor = new Map();
+    const rows = [];
+    for (const st of stories) {
+      if (q && !st.label.toLowerCase().includes(q)) continue;
+      rows.push({ kind: "story", st, points: st.points, time: st.lastTime });
+      seenTitle.add(normTitle(st.label));
+    }
+    // Bulk posters: one author with four or more threads in one forum is spam (for example a market maker's dozens of markets).
+    const counts = new Map();
+    for (const it of items) {
+      if (!it.author || it.author === "Anonymous") continue;
+      const key = `${it.source}:${it.author}`;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    for (const it of items) {
+      if (state.showStories && state.stories.has(`${it.source}:${it.threadId}`)) continue; // shown inside its story
+      if (it.author && (counts.get(`${it.source}:${it.author}`) || 0) >= 4) continue;
+      if (q && !`${it.title} ${it.text} ${it.author} ${it.url}`.toLowerCase().includes(q)) continue;
+      const url = normUrl(it.meta?.externalUrl || it.url);
+      const title = normTitle(it.title);
+      if ((url && seenUrl.has(url)) || (title && seenTitle.has(title))) continue; // same article, or near-identical title
+      // Two rows per author per forum. 4chan's "Anonymous" is not one person, so it is not capped.
+      if (it.author && it.author !== "Anonymous") {
+        const key = `${it.source}:${it.author}`;
+        const n = perAuthor.get(key) || 0;
+        if (n >= 2) continue;
+        perAuthor.set(key, n + 1);
+      }
+      if (url) seenUrl.add(url);
+      if (title) seenTitle.add(title);
+      rows.push({ kind: "thread", it, points: it.score ?? it.meta?.replies ?? 0, time: it.time });
+    }
+    if (sortBy === "hot") rows.sort((a, b) => hotRank(b.points, b.time) - hotRank(a.points, a.time));
+    else rows.sort((a, b) => b.time - a.time);
+    return rows;
+  }
+
+  function tableHTML(rows, page) {
+    if (!rows.length) return `<p class="empty">Nothing to show here.</p>`;
+    const pages = Math.max(1, Math.ceil(rows.length / PAGE_ROWS));
+    const p = Math.min(page, pages - 1);
+    const base = p * PAGE_ROWS;
+    const body = rows.slice(base, base + PAGE_ROWS)
+      .map((r, i) => (r.kind === "story" ? mergedRow(r.st, base + i + 1) : storyRow(r.it, base + i + 1)))
+      .join("");
+    const pager = `
+      <nav class="pager" aria-label="Pages">
+        <button type="button" class="act" data-page="prev"${p === 0 ? " disabled" : ""}>[Prev page]</button>
+        <span>page ${p + 1} of ${pages}</span>
+        <button type="button" class="act" data-page="next"${p >= pages - 1 ? " disabled" : ""}>[Next page]</button>
+      </nav>`;
     return `
       <div class="table">
         <div class="trow thead" aria-hidden="true">
-          <div>Story</div><div>Forums</div><div class="c-replies">Replies</div><div class="c-views">Views</div><div>Last post</div>
+          <div>Story</div><div>Forums</div><div class="c-replies">Replies</div><div>Last post</div>
         </div>
-        ${rows.join("")}
-      </div>`;
+        ${body}
+      </div>${pager}`;
   }
 
   function applyFilter() {
-    const q = filterInput.value.trim().toLowerCase();
-    const matches = it => `${it.title} ${it.text} ${it.author} ${it.url}`.toLowerCase().includes(q);
-    let items = q ? state.items.filter(matches) : state.items;
-    let stories = [];
-    if (state.showStories) {
-      // Threads that belong to a merged story appear in that story's row instead.
-      if (!q) items = items.filter(it => !state.stories.has(`${it.source}:${it.threadId}`));
-      stories = (state.digests || []).filter(st => st.sources.length >= 2 && (!q || st.label.toLowerCase().includes(q)));
-    }
+    const stories = state.showStories ? (state.digests || []).filter(st => st.sources.length >= 2) : [];
+    const rows = homeRows(state.items, stories, state.sortBy);
     const holder = $("#table-holder");
-    if (holder) holder.innerHTML = tableHTML(items, stories);
+    if (holder) holder.innerHTML = tableHTML(rows, state.page);
     const count = $("#count");
-    if (count) count.textContent = q ? `${items.length + stories.length} shown` : "";
+    if (count) count.textContent = filterInput.value.trim() ? `${rows.length} shown` : "";
+    state.rowCount = rows.length;
   }
 
   // Fetches the stories once, so rows can link to them.
@@ -217,8 +276,9 @@
     if (token !== state.token) return;
     let items = data.items ?? data;
     if (source) items = items.filter(it => it.source === source);
-    if (sort === "hot") items = items.slice().sort((a, b) => ((b.score ?? 0) + (b.meta?.replies ?? 0)) - ((a.score ?? 0) + (a.meta?.replies ?? 0)));
     state.items = items;
+    state.sortBy = sort === "hot" ? "hot" : "time";
+    state.page = 0;
     state.showStories = !source && (sort === "hot" || sort === "new");
     state.mode = "list";
     document.title = `${title} · Nice Chan`;
@@ -249,6 +309,9 @@
     if (token !== state.token) return;
     await loadStories();
     state.items = items;
+    state.sortBy = "time";
+    state.page = 0;
+    state.showStories = false;
     state.mode = "list";
     const title = commTitle(source, community);
     document.title = `${title} · ${srcName(source)} · Nice Chan`;
@@ -333,13 +396,12 @@
         </div>
         <div class="c-forums">${st.sources.map(s => `<span class="sq" style="color:${srcColor(s)}">&#9632;</span> ${esc(srcName(s))}`).join("<br>")}</div>
         <div class="c-replies">${esc(plural(st.itemCount, "thread", "threads"))}</div>
-        <div class="c-views">–</div>
         <div class="c-last">${esc(ago(st.lastTime))}</div>
       </div>`).join("");
     view.innerHTML = `
       <h2 class="page-title">&gt;stories</h2>
       <div class="table">
-        <div class="trow thead" aria-hidden="true"><div>Story</div><div>Forums</div><div class="c-replies">Threads</div><div class="c-views">Views</div><div>Last update</div></div>
+        <div class="trow thead" aria-hidden="true"><div>Story</div><div>Forums</div><div class="c-replies">Threads</div><div>Last update</div></div>
         ${rows || `<p class="empty">No shared stories yet.</p>`}
       </div>`;
   }
@@ -396,8 +458,23 @@
       <ol>${(p.disagreements || []).map(x => `<li><b>${esc(x.topic)}</b><ul>${Object.entries(x.sides || {}).map(([k, v]) => `<li>${esc(columnName(k))}: ${esc(v)}</li>`).join("")}</ul></li>`).join("")}</ol>` : "";
 
     const forumsHTML = a ? a.forums.map(forumBlock).join("") : "";
+
+    // What each forum raised, from a fixed list of aspects. Keyword matches, not a judgement.
+    const grid = a && a.aspectGrid ? `
+      <p><b>What each forum talks about</b> <span class="muted-line">(keyword match: "came up", not a verdict)</span></p>
+      <table class="aspect-grid"><thead><tr><th>Aspect</th>${a.forumKeys.map(k => `<th>${esc(columnName(k))}</th>`).join("")}</tr></thead>
+      <tbody>${a.aspectGrid.map(g => `<tr><td>${esc(g.aspect)}</td>${a.forumKeys.map(k => `<td>${g.raisedBy.includes(k) ? "x" : "�"}</td>`).join("")}</tr>`).join("")}</tbody></table>
+      ${(() => {
+        const differ = a.aspectGrid.filter(g => g.raisedBy.length && g.silent.length);
+        return differ.length
+          ? `<p><b>Where they differ:</b> ${differ.map(g => `${esc(g.aspect)} came up on ${g.raisedBy.map(k => esc(columnName(k))).join(", ")} but not on ${g.silent.map(k => esc(columnName(k))).join(", ")}`).join(". ")}.</p>`
+          : "";
+      })()}` : "";
+
+    const caution = `<p class="muted-line">These are the threads we happened to read, not whole communities. Each forum's sample is small and self-selected.</p>`;
+
     const explain = `
-      ${a ? `<p><b>Forum by forum</b></p>${forumsHTML}${sharedList}` : `<p>No analysis yet.</p>`}
+      ${a ? `<p><b>Forum by forum</b></p>${forumsHTML}${sharedList}${grid}${caution}` : `<p>No analysis yet.</p>`}
       ${aiBlock}
       ${!ready ? `<p class="muted-line">AI framing is off. Add ANTHROPIC_API_KEY to .env to add it.</p>` : ""}`;
 
@@ -569,7 +646,15 @@
     if (open) filterInput.focus();
     else { filterInput.value = ""; applyFilter(); }
   });
-  filterInput.addEventListener("input", () => { if (state.mode === "list") applyFilter(); });
+  filterInput.addEventListener("input", () => { state.page = 0; if (state.mode === "list") applyFilter(); });
+  // [Prev page] / [Next page] under the home table.
+  view.addEventListener("click", e => {
+    const b = e.target.closest("[data-page]");
+    if (!b || b.disabled) return;
+    state.page += b.dataset.page === "next" ? 1 : -1;
+    applyFilter();
+    window.scrollTo({ top: 0 });
+  });
 
   // Clicks: masked words (turn Safe mode off), blurred images, quote jumps, and reports.
   document.addEventListener("click", async e => {

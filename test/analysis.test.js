@@ -80,3 +80,27 @@ test("analyseStory gives per-forum stats, the top comment, shared links and post
   assert.ok(a.sharedLinks.some(l => l.url === "a.example/x" && l.forums.length === 2));
   assert.equal(a.counts.threads, 3);
 });
+
+test("aspects: a post raises an aspect only when a keyword matches", () => {
+  const { aspectsOf } = require("../lib/analysis/aspects");
+  assert.deepEqual(aspectsOf("the new tracker leaks privacy data"), ["privacy"]);
+  assert.ok(aspectsOf("layoffs and hiring freeze").includes("jobs"));
+  assert.deepEqual(aspectsOf("the table is brown"), []);
+});
+
+test("analyseStory reports which forums raised each aspect and which stayed silent", () => {
+  const now = 1_700_100_000;
+  const threads = [
+    { ...item("hn", "top", "1", { title: "New bill passes", time: now - 3600 }), score: 50 },
+    { ...item("4chan", "g", "2", { title: "New bill passes", time: now - 3000 }) },
+  ];
+  const posts = [
+    ...threads,
+    item("lemmy", "technology", "3", { threadId: "1", text: "This privacy law is good", time: now - 500 }),
+  ];
+  const a = analyseStory({ threads, posts, now });
+  const privacy = a.aspectGrid.find(g => g.aspect === "privacy");
+  assert.deepEqual(privacy.raisedBy, ["lemmy"]);
+  assert.ok(privacy.silent.includes("hn") && privacy.silent.includes("4chan/g"));
+  assert.deepEqual(a.forumKeys.sort(), ["4chan/g", "hn", "lemmy"].sort());
+});

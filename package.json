@@ -9,8 +9,11 @@
   },
   "scripts": {
     "start": "node --env-file-if-exists=.env server.js",
-    "test": "node --test test/text.test.js test/filter.test.js test/adapters.test.js test/digest.test.js test/analysis.test.js",
+    "test": "node --test test/text.test.js test/filter.test.js test/adapters.test.js test/digest.test.js test/analysis.test.js test/home.test.js",
     "record": "node scripts/record-fixtures.js",
     "ingest": "node scripts/ingest.js"
+  },
+  "dependencies": {
+    "obscenity": "0.4.6"
   }
 }

@@ -6,7 +6,7 @@ const path = require("path");
 const config = require("./config.json");
 const { createRegistry } = require("./lib/sources");
 const { createLatest } = require("./lib/latest");
-const { maskItem } = require("./lib/filter");
+const { maskItem, maskPlain, stillRude } = require("./lib/filter");
 const { excerpt } = require("./lib/text");
 const { createLimiter, visitorHash, adminAllowed } = require("./lib/moderation");
 const { startDigest } = require("./lib/digest/service");
@@ -133,12 +133,22 @@ async function handleApi(req, res, url, rawParts) {
   if (a === "digest") {
     if (!b) {
       const since = Math.floor(Date.now() / 1000) - 48 * 3600;
-      const items = digest.store.listDigests(since).map(({ payload, ...rest }) => ({
-        ...rest,
-        reason: payload.reason ?? null,
-        // Thread keys in this story, so the home page can link its rows to the story.
-        members: (payload.threads || []).map(t => `${t.source}:${t.threadId}`),
-      }));
+      // Titles are masked again on read, and a story whose title still reads as rude is not listed.
+      const items = digest.store.listDigests(since).filter(d => !stillRude(d.label)).map(({ payload, ...rest }) => {
+        const threads = payload.threads || [];
+        const scores = threads.map(t => t.score).filter(x => typeof x === "number");
+        return {
+          ...rest,
+          label: maskPlain(rest.label),
+          labelSource: payload.labelSource ?? null,
+          reason: payload.reason ?? null,
+          // Thread keys in this story, so the home page can link its rows to the story.
+          members: threads.map(t => `${t.source}:${t.threadId}`),
+          // Real totals: replies summed over the threads, and points from the best-scoring thread (replies when no thread has a score).
+          replies: threads.reduce((a, t) => a + (t.replies || 0), 0),
+          points: scores.length ? Math.max(...scores) : threads.reduce((a, t) => a + (t.replies || 0), 0),
+        };
+      });
       return json(res, 200, { aiEnabled: llm.enabled(), job: digest.status(), items });
     }
     if (!ID_RE.test(b)) return json(res, 400, { error: "Bad story id" });
